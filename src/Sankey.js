@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { sankeyLayout } from "./utils/sankey";
+import { isNull } from "lodash";
 import { sankeyLinkHorizontal } from "d3-sankey";
 import { Group } from "@visx/group";
 import { Text } from "@visx/text";
-import useChartDimensions from "./hooks/useChartDimensions";
-import { isNull } from "lodash";
-import { colorNode } from "./utils/colors";
 import { LinearGradient } from "@visx/gradient";
+import Tippy from "@tippyjs/react";
+
+import useChartDimensions from "./hooks/useChartDimensions";
+import { sankeyLayout } from "./utils/layout";
+import { colorNode } from "./utils/colors";
+import { formatCount } from "./utils/formatters";
+import NodeLabel from "./NodeLabel";
+import Tooltip from "./Tooltip";
 
 const linkPath = sankeyLinkHorizontal()
   .source((d) => [d.source.x1, d.y0])
@@ -14,22 +19,24 @@ const linkPath = sankeyLinkHorizontal()
 
 export default function Sankey({ party }) {
   const [chartWrapperRef, dimensions] = useChartDimensions({
-    marginRight: 200,
+    marginRight: 120,
+    marginLeft: 80,
   });
   const [layout, setLayout] = useState(null);
+  const [hoverLink, setHoverLink] = useState(null);
 
   useEffect(() => {
     async function fetchData() {
-      let partyData = await fetch("/api/elections", {
+      let data = await fetch("/api/sankey", {
         method: "POST",
-        body: JSON.stringify({ party }),
+        body: JSON.stringify({ party, measure: "votes" }),
       });
-      partyData = await partyData.json();
+      const { nodes, links } = await data.json();
 
       setLayout(
         sankeyLayout(
-          partyData.results,
-          party,
+          nodes,
+          links,
           dimensions.boundedWidth,
           dimensions.boundedHeight
         )
@@ -38,10 +45,8 @@ export default function Sankey({ party }) {
     fetchData();
   }, [party, dimensions.boundedWidth, dimensions.boundedHeight]);
 
-  console.log(layout?.links);
-
   return (
-    <div ref={chartWrapperRef} className=" w-1/2 h-80">
+    <div ref={chartWrapperRef} className=" w-128 h-80">
       {!isNull(layout) ? (
         <svg viewBox={[0, 0, dimensions.width, dimensions.height]}>
           <Group top={dimensions.marginTop} left={dimensions.marginLeft}>
@@ -56,15 +61,22 @@ export default function Sankey({ party }) {
                     to={endColor}
                     id={`gradient-${party}-${index}`}
                     vertical={false}
+                    gradientUnits="userSpaceOnUse"
+                    toOffset="60%"
+                    fromOffset="30%"
                   />
-
-                  <path
-                    d={linkPath(link)}
-                    stroke={`url('#gradient-${party}-${index}')`}
-                    strokeWidth={Math.max(1, link.width)}
-                    opacity={0.5}
-                    fill="none"
-                  />
+                  <Tippy content={<Tooltip link={link} />}>
+                    <path
+                      d={linkPath(link)}
+                      stroke={`url('#gradient-${party}-${index}')`}
+                      strokeWidth={Math.max(1, link.width)}
+                      strokeOpacity={hoverLink === link.index ? 0.6 : 0.4}
+                      fill="none"
+                      onMouseEnter={() => setHoverLink(link.index)}
+                      onMouseLeave={() => setHoverLink(null)}
+                      className="cursor-pointer"
+                    />
+                  </Tippy>
                 </Group>
               );
             })}
@@ -82,6 +94,35 @@ export default function Sankey({ party }) {
                     stroke={color.stroke}
                     fill={color.fill}
                   />
+                  <NodeLabel node={node} party={party} />
+                  {/* {node?.coalitionParties ? (
+                    <text
+                      dx={1}
+                      dy={"0.4rem"}
+                      x={node.x1 - node.x0}
+                      y={(node.y1 - node.y0) / 2}
+                      fill={color.stroke}
+                      className=" font-semibold text-sm"
+                    >
+                      {[...node.coalitionParties].map((p) => (
+                        <tspan fill={colorNode(p, party).fill} dx={5}>
+                          {p}
+                        </tspan>
+                      ))}
+                    </text>
+                  ) : (
+                    <text
+                      dx={5}
+                      dy={"0.4rem"}
+                      x={node.x1 - node.x0}
+                      y={(node.y1 - node.y0) / 2}
+                      fill={color.stroke}
+                      className=" font-semibold"
+                    >
+                      {node.name}
+                    </text>
+                  )} */}
+                  {/* }
                   <Text
                     x={node.x1 - node.x0}
                     dx={5}
@@ -91,8 +132,12 @@ export default function Sankey({ party }) {
                     fill={color.stroke}
                     className=" font-semibold"
                   >
-                    {node.name}
-                  </Text>
+                    {node?.coalitionParties ? (
+                      [...node.coalitionParties].map((p) => <tspan>{p}</tspan>)
+                    ) : (
+                      <tspan>{node.name}</tspan>
+                    )}
+                  </Text> */}
                 </Group>
               );
             })}
