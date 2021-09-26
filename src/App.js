@@ -1,23 +1,16 @@
-import logo from './logo.svg';
-import './App.css';
+import Sankey from "./Sankey";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="w-2/3 mx-auto my-10">
+      <h1 className="text-3xl text-gray-800 font-semibold text-center">
+        Eleições Autárquicas 2021
+      </h1>
+      <div className="flex flex-wrap">
+        {["PS", "PPD/PSD", "B.E.", "CDS-PP", "PCP"].map((p) => (
+          <Sankey party={p} />
+        ))}
+      </div>
     </div>
   );
 }
