@@ -1,5 +1,5 @@
 import { Group } from "@visx/group";
-import { scaleLinear, scaleBand } from "@visx/scale";
+import { scaleLinear } from "@visx/scale";
 import { Text } from "@visx/text";
 import { Bar } from "@visx/shape";
 import React from "react";

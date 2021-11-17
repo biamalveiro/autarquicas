@@ -3,14 +3,12 @@ import { isNull } from "lodash";
 import { Select } from "@chakra-ui/react";
 import { sankeyLinkHorizontal } from "d3-sankey";
 import { Group } from "@visx/group";
-import { Text } from "@visx/text";
 import { LinearGradient } from "@visx/gradient";
 import Tippy from "@tippyjs/react";
 
 import useChartDimensions from "./hooks/useChartDimensions";
 import { sankeyLayout } from "./utils/layout";
 import { colorNode } from "./utils/colors";
-import { formatCount } from "./utils/formatters";
 import NodeLabel from "./NodeLabel";
 import Tooltip from "./Tooltip";
 
