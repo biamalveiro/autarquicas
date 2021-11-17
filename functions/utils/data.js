@@ -1,7 +1,7 @@
 const { isUndefined } = require("lodash");
 const { acronymRegex, coalitionPartiesRegex } = require("./regex");
-const partiesData = require("../data/parties.json");
-const resultsData = require("../data/results.json");
+const partiesData = require("../data/parties-2021.json");
+const resultsData = require("../data/results-2021.json");
 
 const getResultsByCity = (party) => {
   const partyResults = resultsData
@@ -22,6 +22,7 @@ const getResultsByCity = (party) => {
 
       return {
         acronym: partyResultsInCity.acronym,
+        isWinner: city.cityResults[0].acronym === partyResultsInCity.acronym,
         isCoalition,
         coalitionParties,
         district: city.district,

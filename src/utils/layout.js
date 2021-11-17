@@ -6,7 +6,7 @@ export const sankeyLayout = (nodes, links, width, height) => {
     .nodeAlign(sankeyLeft)
     .nodeSort(null)
     .nodeWidth(8)
-    .nodePadding(15)
+    .nodePadding(30)
     .size([width, height]);
 
   return sankeyLayout({ nodes, links });

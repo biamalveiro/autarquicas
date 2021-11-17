@@ -1,14 +1,16 @@
 const { getResultsByCity } = require("./utils/data");
-const { isEqual, sumBy } = require("lodash");
+const { isEqual, sumBy, isUndefined, isNull } = require("lodash");
 
 const COALITION = "Coligado";
 const NO_COALITION = "Não Coligado";
+const OTHER_COALITION = "Outras Coligações";
 
 const measures = {
   votes: (d) => d.results.votes,
+  mandates: (d) => d.results.mandates,
 };
 
-const getNodes = (data, party, measure) => {
+const getNodes = (data, party, measure, coalitionBreakdownParty) => {
   const partyNode = {
     name: party,
     fixedValue: sumBy(data, measures[measure]),
@@ -16,28 +18,33 @@ const getNodes = (data, party, measure) => {
 
   const nodes = [partyNode, { name: COALITION }, { name: NO_COALITION }];
 
-  const coalitions = data
-    .filter((d) => d.isCoalition)
-    .map((d) => new Set(d.coalitionParties))
-    .reduce((aggregator, el) => {
-      if (!aggregator.some((s) => isEqual(s, el))) {
-        aggregator.push(el);
-      }
-      return aggregator;
-    }, []);
-
-  for (const coalition of coalitions) {
-    coalition.delete(party);
-    nodes.push({
-      name: [...coalition].sort().join("."),
-      isCoalition: true,
-      coalitionParties: [...coalition],
-    });
+  if (!isNull(coalitionBreakdownParty)) {
+    nodes.push(
+      ...[
+        {
+          name: coalitionBreakdownParty,
+        },
+        {
+          name: OTHER_COALITION,
+        },
+      ]
+    );
   }
+
   return nodes;
 };
 
-const getLinks = (data, party, measure, nodes) => {
+const getLinks = (data, party, measure, coalitionBreakdownParty, nodes) => {
+  if (party === "PCP-PEV") {
+    return [
+      {
+        source: party,
+        target: NO_COALITION,
+        value: sumBy(data, measures[measure]),
+      },
+    ];
+  }
+
   const links = [
     {
       source: party,
@@ -57,40 +64,66 @@ const getLinks = (data, party, measure, nodes) => {
     },
   ];
 
-  const coalitionNodes = nodes.filter((n) => n.isCoalition);
-
-  for (const coalitionNode of coalitionNodes) {
-    const coalitionVotes = sumBy(
-      data.filter((d) => {
-        const coalitionSet = new Set(d.coalitionParties);
-        coalitionSet.delete(party);
-        return isEqual(coalitionSet, new Set(coalitionNode.coalitionParties));
-      }),
-      measures[measure]
-    );
-
-    links.push({
-      source: COALITION,
-      target: coalitionNode.name,
-      value: coalitionVotes,
-    });
+  if (isNull(coalitionBreakdownParty)) {
+    return links;
   }
+
+  links.push(
+    ...[
+      {
+        source: COALITION,
+        target: coalitionBreakdownParty,
+        value: sumBy(
+          data.filter((d) => {
+            const coalitionSet = new Set(d.coalitionParties);
+            return coalitionSet.has(coalitionBreakdownParty);
+          }),
+          measures[measure]
+        ),
+      },
+      {
+        source: COALITION,
+        target: OTHER_COALITION,
+        value: sumBy(
+          data.filter((d) => {
+            const coalitionSet = new Set(d.coalitionParties);
+            return (
+              !coalitionSet.has(coalitionBreakdownParty) &&
+              coalitionSet.size >= 2
+            );
+          }),
+          measures[measure]
+        ),
+      },
+    ]
+  );
 
   return links;
 };
 
 exports.handler = async function (event, context) {
-  const { party, measure } = JSON.parse(event.body);
+  const { party, measure, coalitionParty } = JSON.parse(event.body);
 
   const partyResults = getResultsByCity(party);
-  const nodes = getNodes(partyResults, party, measure);
-  const links = getLinks(partyResults, party, measure, nodes);
+
+  const nodes = getNodes(partyResults, party, measure, coalitionParty);
+  const links = getLinks(partyResults, party, measure, coalitionParty, nodes);
+
+  const coalitions = partyResults
+    .filter((d) => d.isCoalition)
+    .map((d) => new Set(d.coalitionParties))
+    .reduce((combined, el) => {
+      return new Set([...combined, ...el]);
+    }, new Set());
+
+  coalitions.delete(party);
 
   return {
     statusCode: 200,
     body: JSON.stringify({
       nodes,
       links,
+      coalitionParties: [...coalitions],
     }),
   };
 };

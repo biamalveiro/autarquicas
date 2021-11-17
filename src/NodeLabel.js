@@ -3,47 +3,47 @@ import { Text } from "@visx/text";
 import React from "react";
 import { formatCount } from "./utils/formatters";
 import { colorNode } from "./utils/colors";
+import enums from "./enum";
 
-export default function NodeLabel({ node, party }) {
-  const isTitleNode = node.depth === 0;
-  const translateDirection = isTitleNode ? -1 : 1;
+const measureLabel = {
+  votes: "votos",
+  mandates: "mandatos",
+};
 
-  let nodeName = node.name;
+export default function NodeLabel({ node, party, measure }) {
+  const nodeName = node.name === "PCP-PEV" ? "CDU" : node.name;
 
-  let fontSize = "text-base";
-  if (isTitleNode) {
-    fontSize = "text-lg";
-  }
-
-  if (node.depth === 2) {
-    fontSize = "text-sm";
-    nodeName = node.coalitionParties.filter((p) => p !== party).join("-");
-  }
+  const y = (node.y1 - node.y0) / 2;
 
   return (
-    <Group top={(node.y1 - node.y0) / 2}>
+    <Group top={node.name === enums.OTHER_COALITION ? y + 10 : y}>
       <Text
         verticalAnchor="middle"
-        x={isTitleNode ? node.x1 - node.x0 : 0}
-        textAnchor={isTitleNode ? "end" : "start"}
-        dx={`${0.8 * translateDirection}rem`}
-        className={`font-semibold ${fontSize}`}
+        x={0}
+        textAnchor={"start"}
+        dx={"0.8rem"}
+        className={"font-semibold text-base"}
         fill={colorNode(node.name, party).stroke}
-        width={120}
+        width={node.name === enums.NO_COALITION ? 70 : 120}
       >
         {nodeName}
       </Text>
-      {isTitleNode ? (
-        <Text
-          verticalAnchor="middle"
-          textAnchor="end"
-          dx={`${0.3 * translateDirection}rem`}
-          dy={"1rem"}
-          className={"text-xs fill-current text-gray-500"}
-        >
-          {`${formatCount(node.value)} votos`}
-        </Text>
-      ) : null}
+      <Text
+        verticalAnchor="middle"
+        textAnchor="start"
+        dx={"0.8rem"}
+        dy={
+          [enums.NO_COALITION, enums.OTHER_COALITION].includes(node.name)
+            ? "1.5rem"
+            : "1rem"
+        }
+        className={"text-xs fill-current text-gray-500"}
+      >
+        {`${measure === "votes" ? formatCount(node.value) : node.value} ${
+          measureLabel[measure]
+        }`}
+      </Text>
+      )
     </Group>
   );
 }
