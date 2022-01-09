@@ -23,13 +23,15 @@ function App() {
       <h1 className="text-3xl text-gray-800 font-semibold text-center">
         A união faz a força?
       </h1>
+      <h1 className=" text-base uppercase text-gray-500 text-center">
+        Autárquicas 2021
+      </h1>
       <p className="text-center text-gray-600 text-sm w-3/4 mx-auto mt-4 mb-4">
-        Em eleições autárquicas, os principais partidos apresentam-se a eleições
-        pelas várias cidades do país tentando conquistar câmaras e eleger
-        vereadores. São muitos os casos em que partidos se juntam em coligações
-        que ambicionam conseguir mais votos. Com quem se coliga cada um dos
-        principais partidos? Quantos votos de cada partido são fruto de
-        coligações?
+        Em eleições autárquicas, vão a votos os órgãos autárquicos de 308
+        municípios do país. São muitos os casos em que os principais partidos se
+        juntam em coligações que ambicionam conseguir mais votos. Com quem se
+        coliga cada um dos principais partidos? Quantos votos de cada partido
+        são fruto de coligações?
       </p>
       <Legend />
       <Stack direction={{ xs: "column", md: "row-reverse" }}>
