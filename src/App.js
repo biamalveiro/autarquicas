@@ -5,6 +5,7 @@ import Stack from "@mui/material/Stack";
 import Container from "@mui/material/Container";
 
 import Map from "./Map";
+import Legend from "./Legend";
 
 function App() {
   const [activeLink, setActiveLink] = useState(null);
@@ -22,7 +23,7 @@ function App() {
       <h1 className="text-3xl text-gray-800 font-semibold text-center">
         A união faz a força?
       </h1>
-      <p className="text-center text-gray-600 text-sm w-3/4 mx-auto mt-4 mb-8">
+      <p className="text-center text-gray-600 text-sm w-3/4 mx-auto mt-4 mb-4">
         Em eleições autárquicas, os principais partidos apresentam-se a eleições
         pelas várias cidades do país tentando conquistar câmaras e eleger
         vereadores. São muitos os casos em que partidos se juntam em coligações
@@ -30,6 +31,7 @@ function App() {
         principais partidos? Quantos votos de cada partido são fruto de
         coligações?
       </p>
+      <Legend />
       <Stack direction={{ xs: "column", md: "row-reverse" }}>
         <Map activeLink={activeLink} />
         <Stack direction="column" sx={{ width: { sx: "100%", md: "50%" } }}>

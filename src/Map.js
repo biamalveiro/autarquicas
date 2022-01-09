@@ -66,10 +66,10 @@ function Map({ activeLink }) {
         backgroundColor: "white",
         position: "sticky",
         top: 0,
+        py: 2,
         zIndex: 1300, // https://mui.com/customization/z-index/#main-content
       }}
     >
-      {!isEmpty(activeResults) ? <LinkResults results={activeResults} /> : null}
       <Container
         ref={mapWrapperRef}
         sx={{
@@ -116,6 +116,7 @@ function Map({ activeLink }) {
           ) : null}
         </svg>
       </Container>
+      {!isEmpty(activeResults) ? <LinkResults results={activeResults} /> : null}
     </Box>
   );
 }

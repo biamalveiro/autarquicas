@@ -9,14 +9,16 @@ export default function LinkResults({ results }) {
       <Stack direction="column">
         <Stack direction="row" spacing={1} alignItems="center">
           <div className="w-3 h-3" style={{ backgroundColor: fill }} />
-          <span>Venceu ({results.filter((r) => r.isWinner).length})</span>
+          <span className="text-gray-600 text-sm">
+            Venceu ({results.filter((r) => r.isWinner).length})
+          </span>
         </Stack>
         <Stack direction="row" spacing={1} alignItems="center">
           <div
             className="w-3 h-3"
             style={{ backgroundColor: fill, opacity: 0.3 }}
           />
-          <span>
+          <span className="text-gray-600 text-sm">
             Não elegeu presidente (
             {results.length - results.filter((r) => r.isWinner).length})
           </span>
