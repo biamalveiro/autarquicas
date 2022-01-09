@@ -1,6 +1,6 @@
 # Autarquicas 2021
 
-![preview]("https://github.com/biamalveiro/autarquicas/blob/main/preview.gif?raw=true")
+![preview]("preview.gif")
 
 Em eleições autárquicas, vão a votos os órgãos autárquicos de 308 municípios do país. São muitos os casos em que os principais partidos se juntam em coligações que ambicionam conseguir mais votos. Com quem se coliga cada um dos principais partidos? Quantos votos de cada partido são fruto de coligações?
 
