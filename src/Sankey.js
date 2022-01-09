@@ -1,20 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { isNull } from "lodash";
-import { Select } from "@chakra-ui/react";
-import { sankeyLinkHorizontal } from "d3-sankey";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
 import { Group } from "@visx/group";
-import { LinearGradient } from "@visx/gradient";
-import Tippy from "@tippyjs/react";
+import Container from "@mui/material/Container";
 
 import useChartDimensions from "./hooks/useChartDimensions";
 import { sankeyLayout } from "./utils/layout";
 import { colorNode } from "./utils/colors";
 import NodeLabel from "./NodeLabel";
-import Tooltip from "./Tooltip";
-
-const linkPath = sankeyLinkHorizontal()
-  .source((d) => [d.source.x1, d.y0])
-  .target((d) => [d.target.x0, d.y1]);
+import SankeyLink from "./SankeyLink";
 
 export default function Sankey({
   party,
@@ -25,13 +21,9 @@ export default function Sankey({
   activeLink,
 }) {
   const [layout, setLayout] = useState(null);
-  const [hoverLink, setHoverLink] = useState(null);
   const [coalitionParty, setCoalitionParty] = useState(coalitionBreakdownParty);
   const [coalitionPartyOptions, setCoalitionPartyOptions] = useState([]);
-
-  const heightValue = heightScale(
-    layout?.nodes.find((n) => n.name === party)?.value
-  );
+  const [heightValue, setHeightValue] = useState(100);
 
   const [chartWrapperRef, dimensions] = useChartDimensions({
     marginRight: 120,
@@ -49,7 +41,6 @@ export default function Sankey({
       const { nodes, links, coalitionParties } = await data.json();
 
       setCoalitionPartyOptions(coalitionParties);
-
       setLayout(
         sankeyLayout(
           nodes,
@@ -58,6 +49,7 @@ export default function Sankey({
           dimensions.boundedHeight
         )
       );
+      setHeightValue(heightScale(nodes.find((n) => n.name === party).value));
     }
     fetchData();
   }, [
@@ -66,10 +58,11 @@ export default function Sankey({
     dimensions.boundedWidth,
     dimensions.boundedHeight,
     coalitionParty,
+    heightScale,
   ]);
 
   return (
-    <div ref={chartWrapperRef} className="w-128">
+    <Container ref={chartWrapperRef}>
       {!isNull(layout) ? (
         <>
           <h3
@@ -83,18 +76,23 @@ export default function Sankey({
               <p className=" text-gray-600 text-sm mr-2">
                 Ver coligações que íncluem{" "}
               </p>
-              <Select
-                width="30%"
-                size="xs"
-                value={coalitionParty}
-                onChange={(evt) => setCoalitionParty(evt.target.value)}
-              >
-                {coalitionPartyOptions.map((coalitionOption, i) => (
-                  <option key={`select-option=${i}`} value={coalitionOption}>
-                    {coalitionOption}
-                  </option>
-                ))}
-              </Select>
+              <FormControl variant="standard">
+                <Select
+                  width="30%"
+                  size="xs"
+                  value={coalitionParty}
+                  onChange={(evt) => setCoalitionParty(evt.target.value)}
+                >
+                  {coalitionPartyOptions.map((coalitionOption, i) => (
+                    <MenuItem
+                      key={`select-option=${i}`}
+                      value={coalitionOption}
+                    >
+                      {coalitionOption}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </div>
           ) : null}
           <svg viewBox={[0, 0, dimensions.width, dimensions.height]}>
@@ -107,46 +105,26 @@ export default function Sankey({
               />
               {layout.links.map((link, index) => {
                 if (link.value === 0) return null;
-                const startColor = colorNode(link.source.name, party).fill;
-                const endColor = colorNode(link.target.name, party).fill;
 
                 return (
-                  <Group key={`link-${party}-${index}`}>
-                    <LinearGradient
-                      from={startColor}
-                      to={endColor}
-                      id={`gradient-${party}-${index}`}
-                      vertical={false}
-                      gradientUnits="userSpaceOnUse"
-                      toOffset="60%"
-                      fromOffset="30%"
-                    />
-                    <Tippy content={<Tooltip link={link} />}>
-                      <path
-                        d={linkPath(link)}
-                        stroke={`url('#gradient-${party}-${index}')`}
-                        strokeWidth={Math.max(1, link.width)}
-                        strokeOpacity={
-                          hoverLink === link.index ||
-                          (activeLink?.link?.index === link.index &&
-                            activeLink.party === party)
-                            ? 0.5
-                            : 0.2
-                        }
-                        fill="none"
-                        onMouseEnter={() => setHoverLink(link.index)}
-                        onMouseLeave={() => setHoverLink(null)}
-                        className="cursor-pointer"
-                        onClick={() =>
-                          setActiveLink({
-                            party,
-                            linkTarget: link.target.name,
-                            coalitionParty,
-                          })
-                        }
-                      />
-                    </Tippy>
-                  </Group>
+                  <SankeyLink
+                    key={`link-${party}-${index}`}
+                    link={link}
+                    index={index}
+                    party={party}
+                    isActiveLink={
+                      activeLink?.link?.index === link.index &&
+                      activeLink.party === party
+                    }
+                    onClick={() =>
+                      setActiveLink({
+                        party,
+                        link,
+                        linkTarget: link.target.name,
+                        coalitionParty,
+                      })
+                    }
+                  />
                 );
               })}
               {layout.nodes.map((node, index) => {
@@ -174,6 +152,6 @@ export default function Sankey({
           </svg>
         </>
       ) : null}
-    </div>
+    </Container>
   );
 }

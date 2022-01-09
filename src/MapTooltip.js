@@ -29,8 +29,10 @@ export default function MapTooltip({ feature }) {
   });
 
   return (
-    <div className="rounded border border-gray-400 shadow-lg py-2 px-1 bg-white text-sm">
-      <h2 className="font-bold">{feature.properties["NAME_2"]}</h2>
+    <div className=" border border-gray-400 shadow-lg py-1 px-2 bg-white text-sm">
+      <h2 className="font-bold ml-2 my-1 text-lg">
+        {feature.properties["NAME_2"]}
+      </h2>
       <div ref={chartWrapperRef}>
         <svg width={dimensions.width} height={dimensions.height}>
           <Group top={dimensions.marginTop}>
@@ -40,9 +42,9 @@ export default function MapTooltip({ feature }) {
                 <Group
                   top={barHeight * index + barSpacing * index}
                   left={dimensions.marginLeft}
+                  key={`bar-tooltip-${feature.properties.key}-${res.acronym}`}
                 >
                   <Bar
-                    key={`bar-tooltip-${feature.properties.key}-${res.acronym}`}
                     y={barHeight / 2}
                     width={scaleX(res.percentage)}
                     height={barHeight}

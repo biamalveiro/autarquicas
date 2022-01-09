@@ -4,7 +4,7 @@ import { formatCount } from "./utils/formatters";
 
 export default function Tooltip({ link, measure }) {
   return (
-    <div className=" bg-gray-700 shadow-lg px-2 py-1 text-sm text-white">
+    <div className="border border-gray-400 shadow-lg py-1 px-2 bg-white text-sm">
       <h1>
         {![enums.COALITION, enums.NO_COALITION].includes(link.target.name)
           ? "com "

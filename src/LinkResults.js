@@ -1,22 +1,27 @@
+import Stack from "@mui/material/Stack";
 import React from "react";
 import { colorNode } from "./utils/colors";
 
 export default function LinkResults({ results }) {
-  console.log(results);
+  const { fill } = colorNode(results[0].acronym, results[0].acronym);
   return (
     <div>
-      <h3 className="font-bold text-sm">Câmaras</h3>
-      <p>
-        <span
-          className="font-bold"
-          style={{
-            color: colorNode(results[0].acronym, results[0].acronym).stroke,
-          }}
-        >
-          {results.filter((r) => r.isWinner).length}
-        </span>{" "}
-        / {results.length}{" "}
-      </p>
+      <Stack direction="column">
+        <Stack direction="row" spacing={1} alignItems="center">
+          <div className="w-3 h-3" style={{ backgroundColor: fill }} />
+          <span>Venceu ({results.filter((r) => r.isWinner).length})</span>
+        </Stack>
+        <Stack direction="row" spacing={1} alignItems="center">
+          <div
+            className="w-3 h-3"
+            style={{ backgroundColor: fill, opacity: 0.3 }}
+          />
+          <span>
+            Não elegeu presidente (
+            {results.length - results.filter((r) => r.isWinner).length})
+          </span>
+        </Stack>
+      </Stack>
     </div>
   );
 }
